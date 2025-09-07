@@ -1,0 +1,15 @@
+{
+    "uniqueId": "com.facebook:zstd",
+    "developers": [
+        {
+            "name": "Meta Platforms, Inc. and affiliates",
+            "organisationUrl": "https://facebook.github.io/zstd/"
+        }
+    ],
+    "artifactVersion":"1.5.7",
+    "description": "",
+    "name": "Zstandard",
+    "licenses": [
+        "73af773009294d453c8f3a3503fa264e5388d374bb1514642ca62373447a403d3f8606a1c4c4d7cf18b19079b8ec25e38079fcd5fe303715cfa91ebc7d0428e8"
+    ]
+}
