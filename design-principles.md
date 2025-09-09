@@ -22,7 +22,7 @@ We can derive three subprinciples from it:
 
 Ideally, if there is a task *T*, which can be divided into two subtasks, *A* and *B*, a program that can perform *T* should also be able to perform either of *A* or *B* without performing the other subtask.
 
-    Exception: when it is hard to implement, e.g., due to the lack of suitable API.
+Exception: when it is hard to implement, e.g., due to the lack of suitable API.
 
 ### Correctness
 
@@ -30,7 +30,7 @@ Ideally, if there is a task *T*, which can be divided into two subtasks, *A* and
 
 Incorrectly decoded characters, known as tofu, are awful. There should be a way to prevent them.
 
-    Reason: This loss in metadata (i.e. incorrectly decoding file names in an archive; file names are considered metadata that describe their contents) will significantly affect the availability of information, as you will be unable to identify and find files (unless the file names are in ASCII only, which isn't realistic in this modern world, and it is also unrealistic to assume that all archives use UTF-8).
+Reason: This loss in metadata (i.e. incorrectly decoding file names in an archive; file names are considered metadata that describe their contents) will significantly affect the availability of information, as you will be unable to identify and find files (unless the file names are in ASCII only, which isn't realistic in this modern world, and it is also unrealistic to assume that all archives use UTF-8).
 
 #### Give the control
 
