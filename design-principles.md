@@ -30,7 +30,7 @@ Exception: when it is hard to implement, e.g., due to the lack of suitable API.
 
 Incorrectly decoded characters, known as tofu, are awful. There should be a way to prevent them.
 
-Reason: This loss in metadata (i.e. incorrectly decoding file names in an archive; file names are considered metadata that describe their contents) will significantly affect the availability of information, as you will be unable to identify and find files (unless the file names are in ASCII only, which isn't realistic in this modern world, and it is also unrealistic to assume that all archives use UTF-8).
+Reason: This loss of metadata (i.e. incorrectly decoding file names in an archive; file names are considered metadata that describe their contents) will significantly affect the availability of information, as you will be unable to identify and find files (unless the file names are in ASCII only, which isn't realistic in this modern world, and it is also unrealistic to assume that all archives use UTF-8, as those files might have been archived before UTF-8 is invented or adopted).
 
 #### Give the control
 
