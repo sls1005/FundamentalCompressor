@@ -60,9 +60,13 @@ This app can:
 
 * When compressing/decompressing/archiving/unarchiving, this app's UI can become very slow, because it might be running code on the same thread. It is not a bug, at least not an unexpected behavior.
 
-* This app can work alone, but it is just like a tool that does only one thing, so you usually need to use it with your system's default file browser, or with an installed custom file browser.
+* This app can work alone, but it is just like a program that does only one thing, so you usually need to use it with your system's default file browser, or with an installed custom file browser.
 
-* This app supports many formats (except `.rar`, which isn't currently support and might not be supported in the future), including most compression-only format (i.e. one-file compression formats, such as `.xz`; for both compression and decompression), and it can decode basically all encodings supported by your device / operating system (only when decoding file names, as this app doesn't process the file contents in a way that would involve text-decoding); if you can't find a format/encoding in the list, try scrolling down.
+* This app supports many formats (except `.rar`, which isn't currently support and might not be supported in the future), including most compression-only format (i.e. one-file compression formats, such as `.gz` and `.xz`; for both compression and decompression), and it can decode basically all encodings supported by your device / operating system (only when decoding file names, as this app doesn't process the file contents in a way that would involve decoding the file content as text); if you can't find a format/encoding in the list, try scrolling down; there might be more options hidden.
+
+* Some format combinations, such as `*.zip.gz` and `*.7z.xz`, aren't directly supported by this app. Instead, they are *indirectly* supported. If the file is truly compressed twice, you may try decompressing it twice with this app (by using this app twice; the first time on the original file, the second time on the result of the first time). Similarly, one can indirectly create a file of such format by using this app twice.
+
+* When you use this app to decompress/unarchive a file, this app will try to automatically infer the compression/archive format of that file, but it isn't always correct (For example, if you store a file as `myarchive.tar.xz` in a directory containing a file of the same name, the system can add a number between the file's base name and its extension name to prevent conflicts, and the next time you open it, only the last part (`.xz`) is recognized.), so you can also override this format to ensure correctness; however, if you choose the wrong format, the result will be incorrect, and this app might not show an error about that.
 
 * This app only uses the temporary permissions to access files; it doesn't use persistable permissions.
 
