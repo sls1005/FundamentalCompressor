@@ -10,9 +10,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -80,6 +82,7 @@ import org.apache.commons.compress.compressors.z.ZCompressorInputStream
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream
 import test.sls1005.projects.fundamentalcompressor.ui.theme.FundamentalCompressorTheme
 import test.sls1005.projects.fundamentalcompressor.ui.CardWithTitle
+import test.sls1005.projects.fundamentalcompressor.ui.CompressorOrDecompressorUILayout
 import test.sls1005.projects.fundamentalcompressor.ui.PasswordInputField
 import test.sls1005.projects.fundamentalcompressor.ui.PlaceVerticallyCentrally
 import test.sls1005.projects.fundamentalcompressor.ui.PlaceVerticallyFromStart
@@ -436,475 +439,517 @@ class DecompressorActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState())
                     ) {
                         inputFileUri?.also { inputUriLocal ->
-                            OutlinedCard(
-                                modifier = Modifier.fillMaxWidth().padding(10.dp)
-                            ) {
-                                PlaceVerticallyCentrally {
-                                    if (isRunningTask) {
-                                        Text(
-                                            stringResource(
-                                                if (shouldCreateNoMoreThanOneFile) {
-                                                    R.string.file_is_being_decompressed 
-                                                } else {
-                                                    R.string.file_is_being_unarchived
-                                                }
-                                            ),
-                                            fontSize = 24.sp,
-                                            lineHeight = 26.sp,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp)
-                                        )
-                                        Text(
-                                            inputFileName,
-                                            fontSize = 24.sp,
-                                            lineHeight = 26.sp,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp)
-                                        )
-                                        if ((currentProgress.floatValue.let { (0.0f <= it) && (it <= 1.0f) }) && (selectedOrInferredFormat != CompressionOrArchiveFormat.SEVEN_Z)) {
-                                            LinearProgressIndicator({ currentProgress.floatValue }, modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
-                                        } else {
-                                            LinearProgressIndicator(modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
-                                        }
-                                        OutlinedButton(
-                                            onClick = {
-                                                currentTask?.apply {
-                                                    if (isActive) {
-                                                        cancel()
-                                                    }
-                                                }
-                                            },
-                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
-                                        ) {
-                                            Text(stringResource(id = R.string.cancel), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
-                                        }
-                                    } else {
-                                        Column(modifier = Modifier.padding(bottom = 5.dp)) {
-                                            Text(stringResource(id = R.string.file_has_been_selected), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
-                                            TextButton(
-                                                onClick = {
-                                                    selectInputFile.launch("application/*")
-                                                },
-                                                shape = RectangleShape,
-                                                modifier = Modifier.fillMaxWidth().padding(start = 17.dp, end = 17.dp, top = 2.dp, bottom = if (taskIsCompleted) { 10.dp } else { 2.dp })
-                                            ) {
-                                                Text(stringResource(id = R.string.file_name_and_compressed_size, inputFileName, inputFileSizeStr), fontSize = 24.sp, lineHeight = 26.sp)
-                                            }
-                                            if (!taskIsCompleted) {
-                                                Text(stringResource(id = R.string.decompressor_info1), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 10.dp))
-                                            }
-                                            if (!formatWasInferred) {
-                                                Text(
-                                                    stringResource(id = R.string.error1),
-                                                    fontSize = 24.sp,
-                                                    modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if (taskIsCompleted) {
-                                OutlinedCard(
-                                    modifier = Modifier.fillMaxWidth().padding(10.dp)
-                                ) {
-                                    PlaceVerticallyCentrally {
-                                        Text(stringResource(id = R.string.task_is_completed), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
-                                        OutlinedButton(
-                                            onClick = { (this@DecompressorActivity).finish() },
-                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
-                                        ) {
-                                            Text(stringResource(id = R.string.exit), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
-                                        }
-                                    }
-                                }
-                            }
-                            CardWithTitle(stringResource(id = R.string.options)) {
-                                val formatDisplayName by remember {
-                                    derivedStateOf {
-                                        getDisplayNameOf(
-                                            if (autoMode) {
-                                                null
-                                            } else {
-                                                selectedOrInferredFormat
-                                            },
-                                            isTarball = assumesTarball,
-                                            this@DecompressorActivity
-                                        )
-                                    }
-                                }
-                                var menuExpanded by remember { mutableStateOf(false) }
-                                ExposedDropdownMenuBox(
-                                    expanded = menuExpanded,
-                                    onExpandedChange = { menuExpanded = it },
-                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 10.dp)
-                                ) {
-                                    OutlinedTextField(
-                                        formatDisplayName,
-                                        readOnly = true,
-                                        onValueChange = { /* Empty */ },
-                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
-                                        label = { Text(stringResource(id = R.string.file_format)) },
-                                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
-                                    )
-                                    ExposedDropdownMenu(
-                                        expanded = menuExpanded,
-                                        onDismissRequest = { menuExpanded = false }
+                            CompressorOrDecompressorUILayout(
+                                {
+                                    OutlinedCard(
+                                        modifier = Modifier.fillMaxWidth().padding(10.dp)
                                     ) {
-                                        val couldNotInferFormat = !formatWasInferred
-                                        if (couldNotInferFormat) {
-                                            DropdownMenuItem(
-                                                text = { Text(stringResource(id = R.string.unspecified), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
-                                                onClick = {
-                                                    decompressorMode = MaskableInt(DECOMPRESSOR_MODE_AUTO)
-                                                    formatIsManuallySelected = true
-                                                    menuExpanded = false
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                }
-                                            )
-                                        }
-                                        (remember {
-                                            arrayOf(
-                                                CompressionOrArchiveFormat.BR,
-                                                CompressionOrArchiveFormat.BZIP2,
-                                                CompressionOrArchiveFormat.GZIP,
-                                                CompressionOrArchiveFormat.LZMA,
-                                                CompressionOrArchiveFormat.LZ4,
-                                                CompressionOrArchiveFormat.XZ,
-                                                CompressionOrArchiveFormat.Z,
-                                                CompressionOrArchiveFormat.ZSTD,
-                                                CompressionOrArchiveFormat.SEVEN_Z,
-                                                CompressionOrArchiveFormat.TAR,
-                                                CompressionOrArchiveFormat.ZIP
-                                            )
-                                        }).forEach {
-                                            DropdownMenuItem(
-                                                text = { Text(toDisplayName(it), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
-                                                onClick = {
-                                                    selectedOrInferredFormat = it
-                                                    decompressorMode = decompressorMode.withFlagsUnset(DECOMPRESSOR_MODE_AUTO, DECOMPRESSOR_MODE_ASSUME_TARBALL) // The result can be 0 or DECOMPRESSOR_MODE_TARBALL_IS_INFERRED
-                                                    formatIsManuallySelected = true
-                                                    menuExpanded = false
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                }
-                                            )
-                                        }
-                                        if (couldNotInferFormat) {
-                                            DropdownMenuItem(
-                                                text = { Text(getDisplayNameOf(null, isTarball = true), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
-                                                onClick = {
-                                                    decompressorMode = maskableIntOf(DECOMPRESSOR_MODE_AUTO, DECOMPRESSOR_MODE_ASSUME_TARBALL)
-                                                    formatIsManuallySelected = true
-                                                    menuExpanded = false
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                }
-                                            )
-                                        }
-                                        (remember {
-                                            arrayOf(
-                                                CompressionOrArchiveFormat.BR,
-                                                CompressionOrArchiveFormat.BZIP2,
-                                                CompressionOrArchiveFormat.GZIP,
-                                                CompressionOrArchiveFormat.LZMA,
-                                                CompressionOrArchiveFormat.LZ4,
-                                                CompressionOrArchiveFormat.XZ,
-                                                CompressionOrArchiveFormat.Z,
-                                                CompressionOrArchiveFormat.ZSTD
-                                            )
-                                        }).forEach {
-                                            DropdownMenuItem(
-                                                text = { Text(getDisplayNameOf(it, isTarball = true), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
-                                                onClick = {
-                                                    selectedOrInferredFormat = it
-                                                    decompressorMode = decompressorMode.withBitsSet(DECOMPRESSOR_MODE_ASSUME_TARBALL)
-                                                    formatIsManuallySelected = true
-                                                    menuExpanded = false
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                                if (formatWasInferred && (!formatIsManuallySelected)) {
-                                    Text(stringResource(id = R.string.decompressor_info3), fontSize = 16.sp, lineHeight = 17.sp, modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 0.dp, bottom = 10.dp))
-                                }
-                                PlaceVerticallyFromStart {
-                                    if (decompressorMode.contains(DECOMPRESSOR_MODE_TARBALL_IS_INFERRED) && (!selectedOrInferredFormat.isArchiveFormat())) { // Without tjis check, there will be strange options like ".tar.tar"
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
-                                        ) {
-                                            Checkbox(
-                                                checked = !assumesTarball,
-                                                onCheckedChange = { checked ->
-                                                    decompressorMode = if (checked) { // if checked, decompress only (and produce an uncompressed unextracted archive); if not checked, decompress and extract
-                                                        decompressorMode.withBitsUnset(DECOMPRESSOR_MODE_ASSUME_TARBALL)
-                                                    } else {
-                                                        decompressorMode.withBitsSet(DECOMPRESSOR_MODE_ASSUME_TARBALL)
-                                                    }
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                },
-                                                enabled = !isRunningTask,
-                                                modifier = Modifier.padding(2.dp)
-                                            )
-                                            Text(stringResource(id = R.string.decompressor_option_decompress_only),
-                                                fontSize = 24.sp,
-                                                lineHeight = 26.sp
-                                            )
-                                        }
-                                        Text(stringResource(id = R.string.decompressor_info2), fontSize = 16.sp, lineHeight = 17.sp, modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 0.dp, bottom = 10.dp))
-                                    }
-                                }
-                                PlaceVerticallyFromStart {
-                                    val shouldAllowOverridingFileNameEncoding by remember {
-                                        derivedStateOf {
-                                            if (assumesTarball) {
-                                                true
-                                            } else if (autoMode) {
-                                                false
-                                            } else {
-                                                when (selectedOrInferredFormat) {
-                                                    CompressionOrArchiveFormat.TAR, CompressionOrArchiveFormat.ZIP -> true
-                                                    else -> false
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (shouldAllowOverridingFileNameEncoding) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
-                                        ) {
-                                            Checkbox(
-                                                checked = shouldOverrideFileNameEncoding,
-                                                onCheckedChange = {
-                                                    shouldOverrideFileNameEncoding = it
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                },
-                                                enabled = !isRunningTask,
-                                                modifier = Modifier.padding(2.dp)
-                                            )
-                                            Text(
-                                                stringResource(id = R.string.decompressor_option_override_encoding),
-                                                fontSize = 24.sp,
-                                                lineHeight = 26.sp
-                                            )
-                                        }
-                                        if (shouldOverrideFileNameEncoding) {
-                                            var menuExpanded by remember { mutableStateOf(false) }
-                                            ExposedDropdownMenuBox(
-                                                expanded = menuExpanded,
-                                                onExpandedChange = { menuExpanded = it },
-                                                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 10.dp)
-                                            ) {
-                                                OutlinedTextField(
-                                                    selectedEncodingForOverriding.displayName(),
-                                                    readOnly = true,
-                                                    onValueChange = { /* Empty */ },
-                                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
-                                                    label = { Text(stringResource(id = R.string.encoding)) },
-                                                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                                    modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
+                                        PlaceVerticallyCentrally {
+                                            if (isRunningTask) {
+                                                Text(
+                                                    stringResource(
+                                                        if (shouldCreateNoMoreThanOneFile) {
+                                                            R.string.file_is_being_decompressed 
+                                                        } else {
+                                                            R.string.file_is_being_unarchived
+                                                        }
+                                                    ),
+                                                    fontSize = 24.sp,
+                                                    lineHeight = 26.sp,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp)
                                                 )
-                                                ExposedDropdownMenu(
-                                                    expanded = menuExpanded,
-                                                    onDismissRequest = { menuExpanded = false }
-                                                ) {
-                                                    Charset.availableCharsets().forEach {
-                                                        val name = it.key
-                                                        val encoding = it.value
-                                                        DropdownMenuItem(
-                                                            text = { Text(name, fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(5.dp)) },
-                                                            onClick = {
-                                                                selectedEncodingForOverriding = encoding
-                                                                menuExpanded = false
-                                                                if (jobIsCompletedOrCancelled(currentTask)) {
-                                                                    currentTask = null
-                                                                    taskStatus.intValue = 0
-                                                                }
+                                                Text(
+                                                    inputFileName,
+                                                    fontSize = 24.sp,
+                                                    lineHeight = 26.sp,
+                                                    textAlign = TextAlign.Center,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp)
+                                                )
+                                                if ((currentProgress.floatValue.let { (0.0f <= it) && (it <= 1.0f) }) && (selectedOrInferredFormat != CompressionOrArchiveFormat.SEVEN_Z)) {
+                                                    LinearProgressIndicator({ currentProgress.floatValue }, modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
+                                                } else {
+                                                    LinearProgressIndicator(modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
+                                                }
+                                                OutlinedButton(
+                                                    onClick = {
+                                                        currentTask?.apply {
+                                                            if (isActive) {
+                                                                cancel()
                                                             }
+                                                        }
+                                                    },
+                                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
+                                                ) {
+                                                    Text(stringResource(id = R.string.cancel), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(2.dp))
+                                                }
+                                            } else {
+                                                Column(modifier = Modifier.padding(bottom = 5.dp)) {
+                                                    Text(stringResource(id = R.string.file_has_been_selected), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
+                                                    TextButton(
+                                                        onClick = {
+                                                            selectInputFile.launch("application/*")
+                                                        },
+                                                        shape = RectangleShape,
+                                                        modifier = Modifier.fillMaxWidth().padding(start = 17.dp, end = 17.dp, top = 2.dp, bottom = if (taskIsCompleted) { 10.dp } else { 2.dp })
+                                                    ) {
+                                                        Text(stringResource(id = R.string.file_name_and_compressed_size, inputFileName, inputFileSizeStr), fontSize = 24.sp, lineHeight = 26.sp)
+                                                    }
+                                                    if (!taskIsCompleted) {
+                                                        Text(stringResource(id = R.string.decompressor_info1), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 10.dp))
+                                                    }
+                                                    if (!formatWasInferred) {
+                                                        Text(
+                                                            stringResource(id = R.string.error1),
+                                                            fontSize = 24.sp,
+                                                            modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
                                                         )
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                }
-                                PlaceVerticallyFromStart {
-                                    if (decompressorMode.bitsNotSet(DECOMPRESSOR_MODE_AUTO) && (selectedOrInferredFormat == CompressionOrArchiveFormat.SEVEN_Z)) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
+                                    if (taskIsCompleted) {
+                                        OutlinedCard(
+                                            modifier = Modifier.fillMaxWidth().padding(10.dp)
                                         ) {
-                                            Checkbox(
-                                                checked = (shouldUsePassword || requiresPassword),
-                                                onCheckedChange = { checked ->
-                                                    password.clearText()
-                                                    shouldUsePassword = checked
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                },
-                                                enabled = !(isRunningTask || requiresPassword),
-                                                modifier = Modifier.padding(2.dp)
-                                            )
-                                            Text(
-                                                stringResource(id = R.string.decompressor_option_use_password),
-                                                fontSize = 24.sp,
-                                                lineHeight = 26.sp,
-                                            )
-                                        }
-                                        if (shouldUsePassword || requiresPassword) {
-                                            PasswordInputField(password)
-                                        }
-                                    }
-                                }
-                                PlaceVerticallyFromStart {
-                                    if (assumesTarball) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
-                                        ) {
-                                            Checkbox(
-                                                checked = (linkStrategy == LinkingStrategy.UsePlaceholders),
-                                                onCheckedChange = { checked ->
-                                                    linkStrategy = if (checked) { LinkingStrategy.UsePlaceholders } else { LinkingStrategy.Ignore }
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                },
-                                                enabled = !isRunningTask,
-                                                modifier = Modifier.padding(2.dp)
-                                            )
-                                            Text(
-                                                stringResource(id = R.string.decompressor_option_replace_links),
-                                                fontSize = 24.sp,
-                                                lineHeight = 26.sp
-                                            )
-                                        }
-                                        if (linkStrategy == LinkingStrategy.Ignore) {
-                                            Text(stringResource(id = R.string.decompressor_info4), fontSize = 16.sp, lineHeight = 17.sp, modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 0.dp, bottom = 10.dp))
-                                        }
-                                    }
-                                }
-                                if (!formatWasInferred) {
-                                    Text(stringResource(id = R.string.decompressor_info5), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 0.dp, bottom = 10.dp))
-                                }
-                            }
-                            if (shouldOverrideFileNameEncoding || (decompressorMode.bitsNotSet(DECOMPRESSOR_MODE_AUTO) && (selectedOrInferredFormat == CompressionOrArchiveFormat.ZIP))) { // i.e. show this only if overriding is enabled, or if the format is zip.
-                                CardWithTitle(stringResource(id = R.string.note)) {
-                                    Text(
-                                        stringResource(
-                                            if (shouldOverrideFileNameEncoding) {
-                                                R.string.decompressor_info7
-                                            } else {
-                                                R.string.decompressor_info6
+                                            PlaceVerticallyCentrally {
+                                                Text(stringResource(id = R.string.task_is_completed), textAlign = TextAlign.Center, fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
+                                                OutlinedButton(
+                                                    onClick = { (this@DecompressorActivity).finish() },
+                                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
+                                                ) {
+                                                    Text(stringResource(id = R.string.exit), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(2.dp))
+                                                }
                                             }
-                                        ), fontSize = 24.sp,
-                                        lineHeight = 26.sp,
-                                        modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 15.dp)
-                                    )
-                                }
-                            }
-                            if (!(isRunningTask || taskIsCompleted)) {
-                                OutlinedCard(
-                                    modifier = Modifier.fillMaxWidth().padding(10.dp)
-                                ) {
-                                    PlaceVerticallyCentrally {
-                                        val outputFileName by remember {
+                                        }
+                                    }
+                                },
+                                {
+                                    CardWithTitle(stringResource(id = R.string.options), modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(10.dp)) {
+                                        val formatDisplayName by remember {
                                             derivedStateOf {
-                                                if (shouldCreateNoMoreThanOneFile) {
-                                                    inputFileName.let { inputFileNameLocal ->
-                                                        if (autoMode) {
-                                                            null
-                                                        } else {
-                                                            val i = inputFileNameLocal.lastIndexOf('.')
-                                                            if (i > 0 /* && i == -1 */) { // If the input file is named ".xz" (starts with a dot which is the last dot in the string), we can't name the output file as an empty string or a dot. But if it is named ".tar.xz", then we can name it ".tar" (exactly, starting with a dot and ends with 'r'); ".tar" would be a valid file name (of a hidden file).
-                                                                if (inputFileNameLocal.endsWith(".${selectedOrInferredFormat.fileExtension}")) {
-                                                                    inputFileNameLocal.slice(0 .. (i - 1))
-                                                                } else if (inputFileNameLocal.length > i + 1) {
-                                                                    when (inputFileNameLocal.slice((i + 1) .. (inputFileNameLocal.length - 1))) {
-                                                                        "taz", "tgz", "tlz", "txz", "tzst" -> inputFileNameLocal.slice(0 .. i) + selectedOrInferredFormat.fileExtension
-                                                                        else -> null
-                                                                    }
-                                                                } else {
-                                                                    null
-                                                                }
-                                                            } else {
-                                                                null
+                                                getDisplayNameOf(
+                                                    if (autoMode) {
+                                                        null
+                                                    } else {
+                                                        selectedOrInferredFormat
+                                                    },
+                                                    isTarball = assumesTarball,
+                                                    this@DecompressorActivity
+                                                )
+                                            }
+                                        }
+                                        var menuExpanded by remember { mutableStateOf(false) }
+                                        ExposedDropdownMenuBox(
+                                            expanded = menuExpanded,
+                                            onExpandedChange = { menuExpanded = it },
+                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 10.dp)
+                                        ) {
+                                            OutlinedTextField(
+                                                formatDisplayName,
+                                                readOnly = true,
+                                                onValueChange = { /* Empty */ },
+                                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
+                                                label = { Text(stringResource(id = R.string.file_format)) },
+                                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = menuExpanded,
+                                                onDismissRequest = { menuExpanded = false }
+                                            ) {
+                                                val couldNotInferFormat = !formatWasInferred
+                                                if (couldNotInferFormat) {
+                                                    DropdownMenuItem(
+                                                        text = { Text(stringResource(id = R.string.unspecified), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
+                                                        onClick = {
+                                                            decompressorMode = MaskableInt(DECOMPRESSOR_MODE_AUTO)
+                                                            formatIsManuallySelected = true
+                                                            menuExpanded = false
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
                                                             }
-                                                        } ?: "" // Let the user choose the name. (In this case, they must enter a name for the new file, unless the system allows empty file name)
-                                                    }
-                                                } else {
-                                                    "" // Not used
+                                                        }
+                                                    )
+                                                }
+                                                (remember {
+                                                    arrayOf(
+                                                        CompressionOrArchiveFormat.BR,
+                                                        CompressionOrArchiveFormat.BZIP2,
+                                                        CompressionOrArchiveFormat.GZIP,
+                                                        CompressionOrArchiveFormat.LZMA,
+                                                        CompressionOrArchiveFormat.LZ4,
+                                                        CompressionOrArchiveFormat.XZ,
+                                                        CompressionOrArchiveFormat.Z,
+                                                        CompressionOrArchiveFormat.ZSTD,
+                                                        CompressionOrArchiveFormat.SEVEN_Z,
+                                                        CompressionOrArchiveFormat.TAR,
+                                                        CompressionOrArchiveFormat.ZIP
+                                                    )
+                                                }).forEach {
+                                                    DropdownMenuItem(
+                                                        text = { Text(toDisplayName(it), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
+                                                        onClick = {
+                                                            selectedOrInferredFormat = it
+                                                            decompressorMode = decompressorMode.withFlagsUnset(DECOMPRESSOR_MODE_AUTO, DECOMPRESSOR_MODE_ASSUME_TARBALL) // The result can be 0 or DECOMPRESSOR_MODE_TARBALL_IS_INFERRED
+                                                            formatIsManuallySelected = true
+                                                            menuExpanded = false
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                if (couldNotInferFormat) {
+                                                    DropdownMenuItem(
+                                                        text = { Text(getDisplayNameOf(null, isTarball = true), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
+                                                        onClick = {
+                                                            decompressorMode = maskableIntOf(DECOMPRESSOR_MODE_AUTO, DECOMPRESSOR_MODE_ASSUME_TARBALL)
+                                                            formatIsManuallySelected = true
+                                                            menuExpanded = false
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                (remember {
+                                                    arrayOf(
+                                                        CompressionOrArchiveFormat.BR,
+                                                        CompressionOrArchiveFormat.BZIP2,
+                                                        CompressionOrArchiveFormat.GZIP,
+                                                        CompressionOrArchiveFormat.LZMA,
+                                                        CompressionOrArchiveFormat.LZ4,
+                                                        CompressionOrArchiveFormat.XZ,
+                                                        CompressionOrArchiveFormat.Z,
+                                                        CompressionOrArchiveFormat.ZSTD
+                                                    )
+                                                }).forEach {
+                                                    DropdownMenuItem(
+                                                        text = { Text(getDisplayNameOf(it, isTarball = true), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
+                                                        onClick = {
+                                                            selectedOrInferredFormat = it
+                                                            decompressorMode = decompressorMode.withBitsSet(DECOMPRESSOR_MODE_ASSUME_TARBALL)
+                                                            formatIsManuallySelected = true
+                                                            menuExpanded = false
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
                                                 }
                                             }
                                         }
-                                        Text(
-                                            stringResource(
-                                                if (shouldCreateNoMoreThanOneFile) {
-                                                    R.string.decompression_will_start1
-                                                } else {
-                                                    R.string.decompressor_info8
-                                                }
-                                            ),
-                                            fontSize = 24.sp,
-                                            lineHeight = 26.sp,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp)
-                                        )
-                                        Button(
-                                            onClick = {
-                                                if (shouldCreateNoMoreThanOneFile) {
-                                                    createOutputFile.launch(outputFileName)
-                                                } else {
-                                                    selectOutputDirAndCreateOutputFiles.launch(null)
-                                                }
-                                            },
-                                            modifier = Modifier.padding(15.dp)
-                                        ) {
-                                            Text(stringResource(id = R.string.choose_output_path), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
+                                        if (formatWasInferred && (!formatIsManuallySelected)) {
+                                            Text(stringResource(id = R.string.decompressor_info3), fontSize = 16.sp, lineHeight = 17.sp, modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 0.dp, bottom = 10.dp))
                                         }
-                                        if (!shouldCreateNoMoreThanOneFile) {
-                                            Text(
-                                                stringResource(id = R.string.decompressor_info9) + stringResource(
-                                                    if (decompressorMode.bitsNotSet(DECOMPRESSOR_MODE_AUTO) && (selectedOrInferredFormat == CompressionOrArchiveFormat.TAR)) {
-                                                        R.string.unarchiving_will_start
+                                        PlaceVerticallyFromStart {
+                                            if (decompressorMode.contains(DECOMPRESSOR_MODE_TARBALL_IS_INFERRED) && (!selectedOrInferredFormat.isArchiveFormat())) { // Without tjis check, there will be strange options like ".tar.tar"
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
+                                                ) {
+                                                    Checkbox(
+                                                        checked = !assumesTarball,
+                                                        onCheckedChange = { checked ->
+                                                            decompressorMode = if (checked) { // if checked, decompress only (and produce an uncompressed unextracted archive); if not checked, decompress and extract
+                                                                decompressorMode.withBitsUnset(DECOMPRESSOR_MODE_ASSUME_TARBALL)
+                                                            } else {
+                                                                decompressorMode.withBitsSet(DECOMPRESSOR_MODE_ASSUME_TARBALL)
+                                                            }
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        },
+                                                        enabled = !isRunningTask,
+                                                        modifier = Modifier.padding(2.dp)
+                                                    )
+                                                    Text(stringResource(id = R.string.decompressor_option_decompress_only),
+                                                        fontSize = 24.sp,
+                                                        lineHeight = 26.sp,
+                                                        modifier = Modifier.clickable(enabled = !isRunningTask) {
+                                                            decompressorMode = decompressorMode.withBitsFlipped(DECOMPRESSOR_MODE_ASSUME_TARBALL)
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                Text(stringResource(id = R.string.decompressor_info2), fontSize = 16.sp, lineHeight = 17.sp, modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 0.dp, bottom = 10.dp))
+                                            }
+                                        }
+                                        PlaceVerticallyFromStart {
+                                            val shouldAllowOverridingFileNameEncoding by remember {
+                                                derivedStateOf {
+                                                    if (assumesTarball) {
+                                                        true
+                                                    } else if (autoMode) {
+                                                        false
                                                     } else {
-                                                        R.string.decompression_will_start2
+                                                        when (selectedOrInferredFormat) {
+                                                            CompressionOrArchiveFormat.TAR, CompressionOrArchiveFormat.ZIP -> true
+                                                            else -> false
+                                                        }
                                                     }
-                                                ),
-                                                fontSize = 24.sp,
+                                                }
+                                            }
+                                            if (shouldAllowOverridingFileNameEncoding) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
+                                                ) {
+                                                    Checkbox(
+                                                        checked = shouldOverrideFileNameEncoding,
+                                                        onCheckedChange = {
+                                                            shouldOverrideFileNameEncoding = it
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        },
+                                                        enabled = !isRunningTask,
+                                                        modifier = Modifier.padding(2.dp)
+                                                    )
+                                                    Text(
+                                                        stringResource(id = R.string.decompressor_option_override_encoding),
+                                                        fontSize = 24.sp,
+                                                        lineHeight = 26.sp,
+                                                        modifier = Modifier.clickable(enabled = !isRunningTask) {
+                                                            shouldOverrideFileNameEncoding = !shouldOverrideFileNameEncoding
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                if (shouldOverrideFileNameEncoding) {
+                                                    var menuExpanded by remember { mutableStateOf(false) }
+                                                    ExposedDropdownMenuBox(
+                                                        expanded = menuExpanded,
+                                                        onExpandedChange = { menuExpanded = it },
+                                                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 10.dp)
+                                                    ) {
+                                                        OutlinedTextField(
+                                                            selectedEncodingForOverriding.displayName(),
+                                                            readOnly = true,
+                                                            onValueChange = { /* Empty */ },
+                                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
+                                                            label = { Text(stringResource(id = R.string.encoding)) },
+                                                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
+                                                        )
+                                                        ExposedDropdownMenu(
+                                                            expanded = menuExpanded,
+                                                            onDismissRequest = { menuExpanded = false }
+                                                        ) {
+                                                            Charset.availableCharsets().forEach {
+                                                                val name = it.key
+                                                                val encoding = it.value
+                                                                DropdownMenuItem(
+                                                                    text = { Text(name, fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(5.dp)) },
+                                                                    onClick = {
+                                                                        selectedEncodingForOverriding = encoding
+                                                                        menuExpanded = false
+                                                                        if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                            currentTask = null
+                                                                            taskStatus.intValue = 0
+                                                                        }
+                                                                    }
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        PlaceVerticallyFromStart {
+                                            if (decompressorMode.bitsNotSet(DECOMPRESSOR_MODE_AUTO) && (selectedOrInferredFormat == CompressionOrArchiveFormat.SEVEN_Z)) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
+                                                ) {
+                                                    Checkbox(
+                                                        checked = (shouldUsePassword || requiresPassword),
+                                                        onCheckedChange = { checked ->
+                                                            password.clearText()
+                                                            shouldUsePassword = checked
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        },
+                                                        enabled = !(isRunningTask || requiresPassword),
+                                                        modifier = Modifier.padding(2.dp)
+                                                    )
+                                                    Text(
+                                                        stringResource(id = R.string.decompressor_option_use_password),
+                                                        fontSize = 24.sp,
+                                                        lineHeight = 26.sp,
+                                                        modifier = Modifier.clickable(enabled = !isRunningTask) {
+                                                            password.clearText()
+                                                            shouldUsePassword = !shouldUsePassword
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                if (shouldUsePassword || requiresPassword) {
+                                                    PasswordInputField(password)
+                                                }
+                                            }
+                                        }
+                                        PlaceVerticallyFromStart {
+                                            if (assumesTarball || (selectedOrInferredFormat == CompressionOrArchiveFormat.TAR)) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
+                                                ) {
+                                                    Checkbox(
+                                                        checked = (linkStrategy == LinkingStrategy.UsePlaceholders),
+                                                        onCheckedChange = { checked ->
+                                                            linkStrategy = if (checked) { LinkingStrategy.UsePlaceholders } else { LinkingStrategy.Ignore }
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        },
+                                                        enabled = !isRunningTask,
+                                                        modifier = Modifier.padding(2.dp)
+                                                    )
+                                                    Text(
+                                                        stringResource(id = R.string.decompressor_option_replace_links),
+                                                        fontSize = 24.sp,
+                                                        lineHeight = 26.sp,
+                                                        modifier = Modifier.clickable(enabled = !isRunningTask) {
+                                                            linkStrategy = when (linkStrategy) {
+                                                                LinkingStrategy.UsePlaceholders -> LinkingStrategy.Ignore
+                                                                LinkingStrategy.Ignore -> LinkingStrategy.UsePlaceholders
+                                                            }
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                if (linkStrategy == LinkingStrategy.Ignore) {
+                                                    Text(stringResource(id = R.string.decompressor_info4), fontSize = 16.sp, lineHeight = 17.sp, modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 0.dp, bottom = 10.dp))
+                                                }
+                                            }
+                                        }
+                                        if (!formatWasInferred) {
+                                            Text(stringResource(id = R.string.decompressor_info5), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 0.dp, bottom = 10.dp))
+                                        }
+                                    }
+                                },
+                                {
+                                    if (shouldOverrideFileNameEncoding || (decompressorMode.bitsNotSet(DECOMPRESSOR_MODE_AUTO) && (selectedOrInferredFormat == CompressionOrArchiveFormat.ZIP))) { // i.e. show this only if overriding is enabled, or if the format is zip.
+                                        CardWithTitle(stringResource(id = R.string.note)) {
+                                            Text(
+                                                stringResource(
+                                                    if (shouldOverrideFileNameEncoding) {
+                                                        R.string.decompressor_info7
+                                                    } else {
+                                                        R.string.decompressor_info6
+                                                    }
+                                                ), fontSize = 24.sp,
                                                 lineHeight = 26.sp,
                                                 modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 15.dp)
                                             )
                                         }
                                     }
+                                },
+                                {
+                                    if (!(isRunningTask || taskIsCompleted)) {
+                                        OutlinedCard(
+                                            modifier = Modifier.fillMaxWidth().padding(10.dp)
+                                        ) {
+                                            PlaceVerticallyCentrally {
+                                                val outputFileName by remember {
+                                                    derivedStateOf {
+                                                        if (shouldCreateNoMoreThanOneFile) {
+                                                            inputFileName.let { inputFileNameLocal ->
+                                                                if (autoMode) {
+                                                                    null
+                                                                } else {
+                                                                    val i = inputFileNameLocal.lastIndexOf('.')
+                                                                    if (i > 0 /* && i == -1 */) { // If the input file is named ".xz" (starts with a dot which is the last dot in the string), we can't name the output file as an empty string or a dot. But if it is named ".tar.xz", then we can name it ".tar" (exactly, starting with a dot and ends with 'r'); ".tar" would be a valid file name (of a hidden file).
+                                                                        if (inputFileNameLocal.endsWith(".${selectedOrInferredFormat.fileExtension}")) {
+                                                                            inputFileNameLocal.slice(0 .. (i - 1))
+                                                                        } else if (inputFileNameLocal.length > i + 1) {
+                                                                            when (inputFileNameLocal.slice((i + 1) .. (inputFileNameLocal.length - 1))) {
+                                                                                "taz", "tgz", "tlz", "txz", "tzst" -> inputFileNameLocal.slice(0 .. i) + CompressionOrArchiveFormat.TAR.fileExtension
+                                                                                else -> null
+                                                                            }
+                                                                        } else {
+                                                                            null
+                                                                        }
+                                                                    } else {
+                                                                        null
+                                                                    }
+                                                                } ?: "" // Let the user choose the name. (In this case, they must enter a name for the new file, unless the system allows empty file name)
+                                                            }
+                                                        } else {
+                                                            "" // Not used
+                                                        }
+                                                    }
+                                                }
+                                                Text(
+                                                    stringResource(
+                                                        if (shouldCreateNoMoreThanOneFile) {
+                                                            R.string.decompression_will_start1
+                                                        } else {
+                                                            R.string.decompressor_info8
+                                                        }
+                                                    ),
+                                                    fontSize = 24.sp,
+                                                    lineHeight = 26.sp,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp)
+                                                )
+                                                Button(
+                                                    onClick = {
+                                                        if (shouldCreateNoMoreThanOneFile) {
+                                                            createOutputFile.launch(outputFileName)
+                                                        } else {
+                                                            selectOutputDirAndCreateOutputFiles.launch(null)
+                                                        }
+                                                    },
+                                                    modifier = Modifier.padding(15.dp)
+                                                ) {
+                                                    Text(stringResource(id = R.string.choose_output_path), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
+                                                }
+                                                if (!shouldCreateNoMoreThanOneFile) {
+                                                    Text(
+                                                        stringResource(id = R.string.decompressor_info9) + stringResource(
+                                                            if (decompressorMode.bitsNotSet(DECOMPRESSOR_MODE_AUTO) && (selectedOrInferredFormat == CompressionOrArchiveFormat.TAR)) {
+                                                                R.string.unarchiving_will_start
+                                                            } else {
+                                                                R.string.decompression_will_start2
+                                                            }
+                                                        ),
+                                                        fontSize = 24.sp,
+                                                        lineHeight = 26.sp,
+                                                        modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 15.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-                            }
+                            )
                         } ?: PlaceVerticallyCentrally {
                             Button(
                                 onClick = {

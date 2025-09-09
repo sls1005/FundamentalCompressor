@@ -20,6 +20,8 @@ internal final value class MaskableInt(private val n: Int) {
 
     internal inline fun withBitsUnset(k: Int): MaskableInt = MaskableInt(n and k.inv()) // Use `and inv`. Don't use xor.
 
+    internal inline fun withBitsFlipped(k: Int): MaskableInt = MaskableInt(n xor k)
+
     internal inline fun withFlagsSet(vararg flags: Int): MaskableInt {
         var k = n
         for (flag in flags) {

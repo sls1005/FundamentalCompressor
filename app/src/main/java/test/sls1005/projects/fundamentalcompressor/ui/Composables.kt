@@ -1,8 +1,11 @@
 package test.sls1005.projects.fundamentalcompressor.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldState
@@ -13,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,10 +43,53 @@ internal fun PlaceVerticallyFromStart(block: @Composable ColumnScope.() -> Unit)
 }
 
 @Composable
-internal fun CardWithTitle(title: String, block: @Composable ColumnScope.() -> Unit) {
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth().padding(10.dp)
-    ) {
+internal inline fun CompressorOrDecompressorUILayout(topStart: @Composable ColumnScope.() -> Unit, topEnd: @Composable ColumnScope.() -> Unit, middle: @Composable ColumnScope.() -> Unit, bottom: @Composable ColumnScope.() -> Unit) {
+    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.fillMaxWidth().padding(0.dp)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.5f).fillMaxHeight().padding(0.dp)
+            ) {
+                topStart()
+                middle()
+            }
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.5f).fillMaxHeight().padding(0.dp)
+            ) {
+                topEnd()
+            }
+        }
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(0.dp)
+        ) {
+            bottom()
+        }
+    } else {
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(0.dp)
+        ) {
+            topStart()
+            topEnd()
+            middle()
+            bottom()
+        }
+    }
+}
+
+@Composable
+internal fun CardWithTitle(title: String, modifier: Modifier, block: @Composable ColumnScope.() -> Unit) {
+    OutlinedCard(modifier = modifier) {
         Text(
             title,
             fontSize = 26.sp,
@@ -54,6 +101,11 @@ internal fun CardWithTitle(title: String, block: @Composable ColumnScope.() -> U
             block()
         }
     }
+}
+
+@Composable
+internal fun CardWithTitle(title: String, block: @Composable ColumnScope.() -> Unit) {
+    CardWithTitle(title, Modifier.fillMaxWidth().padding(10.dp), block)
 }
 
 @Composable

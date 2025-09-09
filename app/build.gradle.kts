@@ -14,9 +14,13 @@ android {
         applicationId = "test.sls1005.projects.fundamentalcompressor"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.3.2"
+        versionCode = 10
+        versionName = "0.4.0"
         multiDexEnabled = true
+    }
+    androidResources {
+        generateLocaleConfig = true
+        localeFilters += arrayOf("en", "en-rGB", "en-rUS", "zh-rCN", "zh-rHK", "zh-rTW")
     }
     signingConfigs {
         register("release") {
@@ -80,11 +84,18 @@ aboutLibraries {
     }
 }
 
-tasks.register<Copy>("Include license") {
-    include("LICENSE")
-    from("..")
-    into("src/main/assets/")
-}.also {
+arrayOf(
+    tasks.register<Copy>("Include license") {
+        include("LICENSE")
+        from("..")
+        into("src/main/assets/")
+    },
+    tasks.register<Copy>("Update English strings") {
+        include("strings.xml")
+        from("src/main/res/values")
+        into("src/main/res/values-en")
+    }
+).forEach {
     val task = it.get()
     afterEvaluate {
         tasks.named("preReleaseBuild") {
@@ -92,3 +103,4 @@ tasks.register<Copy>("Include license") {
         }
     }
 }
+

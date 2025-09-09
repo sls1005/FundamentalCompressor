@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
@@ -87,7 +88,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(10.dp)
                         ) {
                             Text(
-                                "Compress",
+                                stringResource(id = R.string.compress),
                                 fontSize = 24.sp,
                                 lineHeight = 26.sp,
                                 modifier = Modifier.padding(5.dp)
@@ -107,7 +108,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(10.dp)
                         ) {
                             Text(
-                                "Decompress",
+                                stringResource(id = R.string.decompress),
                                 fontSize = 24.sp,
                                 lineHeight = 26.sp,
                                 modifier = Modifier.padding(5.dp)
@@ -127,7 +128,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(10.dp)
                         ) {
                             Text(
-                                "Documentation",
+                                stringResource(id = R.string.documentation),
                                 fontSize = 24.sp,
                                 lineHeight = 26.sp,
                                 modifier = Modifier.padding(5.dp)

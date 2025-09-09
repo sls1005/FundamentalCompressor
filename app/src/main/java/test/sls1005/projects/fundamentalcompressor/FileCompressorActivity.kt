@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -79,6 +80,7 @@ import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream
 import test.sls1005.projects.fundamentalcompressor.ui.theme.FundamentalCompressorTheme
 import test.sls1005.projects.fundamentalcompressor.ui.CardWithTitle
+import test.sls1005.projects.fundamentalcompressor.ui.CompressorOrDecompressorUILayout
 import test.sls1005.projects.fundamentalcompressor.ui.PlaceVerticallyCentrally
 import test.sls1005.projects.fundamentalcompressor.ui.PlaceVerticallyFromStart
 import test.sls1005.projects.fundamentalcompressor.ui.PasswordSettingFields
@@ -211,318 +213,343 @@ class FileCompressorActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState())
                     ) {
                         inputFileUri?.also { inputUriLocal ->
-                            OutlinedCard(
-                                modifier = Modifier.fillMaxWidth().padding(10.dp)
-                            ) {
-                                PlaceVerticallyCentrally {
-                                    if (isRunningTask) {
-                                        Text(stringResource(id = R.string.file_is_being_compressed), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
-                                        Text(
-                                            inputFileName,
-                                            fontSize = 24.sp,
-                                            lineHeight = 26.sp,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp)
-                                        )
-                                        if (currentProgress.floatValue.let { (0.0f <= it) && (it <= 1.0f) }) {
-                                            LinearProgressIndicator({ currentProgress.floatValue }, modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
-                                        } else {
-                                            LinearProgressIndicator(modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
-                                        }
-                                        OutlinedButton(
-                                            onClick = {
-                                                currentTask?.apply {
-                                                    if (isActive) {
-                                                        cancel()
-                                                    }
-                                                }
-                                            },
-                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
-                                        ) {
-                                            Text(stringResource(id = R.string.cancel), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
-                                        }
-                                    } else {
-                                        Text(stringResource(id = R.string.file_has_been_selected), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
-                                        TextButton(
-                                            onClick = {
-                                                selectInputFile.launch("*/*")
-                                            },
-                                            shape = RectangleShape,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 17.dp, end = 17.dp, top = 2.dp, bottom = if (taskIsCompleted) { 15.dp } else { 2.dp })
-                                        ) {
-                                            Text(stringResource(R.string.file_or_dir_name_and_size, inputFileName, inputFileSizeStr), fontSize = 24.sp, lineHeight = 26.sp)
-                                        }
-                                        if (!taskIsCompleted) {
-                                            Text(
-                                                stringResource(id = R.string.file_compressor_info1),
-                                                fontSize = 24.sp,
-                                                lineHeight = 26.sp,
-                                                modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 15.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                            if (taskIsCompleted) {
-                                OutlinedCard(
-                                    modifier = Modifier.fillMaxWidth().padding(10.dp)
-                                ) {
-                                    PlaceVerticallyCentrally {
-                                        Text(stringResource(id = R.string.task_is_completed), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
-                                        OutlinedButton(
-                                            onClick = { (this@FileCompressorActivity).finish() },
-                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
-                                        ) {
-                                            Text(stringResource(id = R.string.exit), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
-                                        }
-                                    }
-                                }
-                            }
-                            CardWithTitle(stringResource(id = R.string.options)) {
-                                val formatDisplayName by remember { derivedStateOf { toDisplayName(selectedFormat) } }
-                                var menuExpanded by remember { mutableStateOf(false) }
-                                ExposedDropdownMenuBox(
-                                    expanded = menuExpanded,
-                                    onExpandedChange = { menuExpanded = it },
-                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 10.dp)
-                                ) {
-                                    OutlinedTextField(
-                                        formatDisplayName,
-                                        readOnly = true,
-                                        onValueChange = { /* Empty */ },
-                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
-                                        label = { Text(stringResource(id = R.string.compression_format)) },
-                                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
-                                    )
-                                    ExposedDropdownMenu(
-                                        expanded = menuExpanded,
-                                        onDismissRequest = { menuExpanded = false }
+                            CompressorOrDecompressorUILayout(
+                                {
+                                    OutlinedCard(
+                                        modifier = Modifier.fillMaxWidth().padding(10.dp)
                                     ) {
-                                        (remember {
-                                            arrayOf(
-                                                CompressionOrArchiveFormat.BZIP2,
-                                                CompressionOrArchiveFormat.GZIP,
-                                                CompressionOrArchiveFormat.LZMA,
-                                                CompressionOrArchiveFormat.LZ4,
-                                                CompressionOrArchiveFormat.XZ,
-                                                CompressionOrArchiveFormat.ZSTD,
-                                                // Above: compression formats; below: archive formats
-                                                CompressionOrArchiveFormat.SEVEN_Z,
-                                                CompressionOrArchiveFormat.ZIP
-                                            )
-                                        }).forEach { format ->
-                                            DropdownMenuItem(
-                                                text = { Text(toDisplayName(format), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
-                                                onClick = {
-                                                    selectedFormat = format
-                                                    menuExpanded = false
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
+                                        PlaceVerticallyCentrally {
+                                            if (isRunningTask) {
+                                                Text(stringResource(id = R.string.file_is_being_compressed), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
+                                                Text(
+                                                    inputFileName,
+                                                    fontSize = 24.sp,
+                                                    lineHeight = 26.sp,
+                                                    textAlign = TextAlign.Center,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp)
+                                                )
+                                                if (currentProgress.floatValue.let { (0.0f <= it) && (it <= 1.0f) }) {
+                                                    LinearProgressIndicator({ currentProgress.floatValue }, modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
+                                                } else {
+                                                    LinearProgressIndicator(modifier = Modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 5.dp))
                                                 }
-                                            )
-                                        }
-                                    }
-                                }
-                                if (selectedFormat == CompressionOrArchiveFormat.SEVEN_Z) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Start,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
-                                    ) {
-                                        Checkbox(
-                                            checked = shouldUsePassword,
-                                            onCheckedChange = { checked ->
-                                                password1.clearText()
-                                                password2.clearText()
-                                                shouldUsePassword = checked
-                                                if (jobIsCompletedOrCancelled(currentTask)) {
-                                                    currentTask = null
-                                                    taskStatus.intValue = 0
-                                                }
-                                            },
-                                            enabled = !isRunningTask,
-                                            modifier = Modifier.padding(2.dp)
-                                        )
-                                        Text(
-                                            stringResource(id = R.string.compressor_option_set_password),
-                                            fontSize = 24.sp,
-                                            lineHeight = 26.sp
-                                        )
-                                    }
-                                    if (shouldUsePassword) {
-                                        PasswordSettingFields(password1, password2)
-                                    }
-                                }
-                                when (selectedFormat) {
-                                    CompressionOrArchiveFormat.BZIP2, CompressionOrArchiveFormat.GZIP, CompressionOrArchiveFormat.ZIP -> PlaceVerticallyFromStart {
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
-                                        ) {
-                                            Checkbox(
-                                                checked = showsAdvancedOptions,
-                                                onCheckedChange = { checked ->
-                                                    showsAdvancedOptions = checked
-                                                    if (jobIsCompletedOrCancelled(currentTask)) {
-                                                        currentTask = null
-                                                        taskStatus.intValue = 0
-                                                    }
-                                                },
-                                                enabled = !isRunningTask,
-                                                modifier = Modifier.padding(2.dp)
-                                            )
-                                            Text(
-                                                stringResource(id = R.string.show_advanced_options),
-                                                fontSize = 24.sp,
-                                                lineHeight = 26.sp
-                                            )
-                                        }
-                                        if (showsAdvancedOptions) {
-                                            when (selectedFormat) {
-                                                CompressionOrArchiveFormat.ZIP, CompressionOrArchiveFormat.GZIP -> PlaceVerticallyFromStart {
-                                                    var menuExpanded by remember { mutableStateOf(false) }
-                                                    ExposedDropdownMenuBox(
-                                                        expanded = menuExpanded,
-                                                        onExpandedChange = { menuExpanded = it },
-                                                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 10.dp)
-                                                    ) {
-                                                        OutlinedTextField(
-                                                            "$compressionLevel",
-                                                            readOnly = true,
-                                                            onValueChange = { /* Empty */ },
-                                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
-                                                            label = { Text(stringResource(id = R.string.compression_level)) },
-                                                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
-                                                        )
-                                                        ExposedDropdownMenu(
-                                                            expanded = menuExpanded,
-                                                            onDismissRequest = { menuExpanded = false }
-                                                        ) {
-                                                            for (level in 1 .. 9) {
-                                                                DropdownMenuItem(
-                                                                    text = { Text("$level", fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
-                                                                    onClick = {
-                                                                        compressionLevel = level
-                                                                        menuExpanded = false
-                                                                        if (jobIsCompletedOrCancelled(currentTask)) {
-                                                                            currentTask = null
-                                                                            taskStatus.intValue = 0
-                                                                        }
-                                                                    }
-                                                                )
+                                                OutlinedButton(
+                                                    onClick = {
+                                                        currentTask?.apply {
+                                                            if (isActive) {
+                                                                cancel()
                                                             }
                                                         }
-                                                    }
+                                                    },
+                                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
+                                                ) {
+                                                    Text(stringResource(id = R.string.cancel), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(2.dp))
                                                 }
-                                                CompressionOrArchiveFormat.BZIP2 -> PlaceVerticallyFromStart {
-                                                    var menuExpanded by remember { mutableStateOf(false) }
-                                                    ExposedDropdownMenuBox(
-                                                        expanded = menuExpanded,
-                                                        onExpandedChange = { menuExpanded = it },
-                                                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 10.dp)
-                                                    ) {
-                                                        OutlinedTextField(
-                                                            "${100 * blockSize} kB",
-                                                            readOnly = true,
-                                                            onValueChange = { /* Empty */ },
-                                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
-                                                            label = { Text(stringResource(id = R.string.block_size)) },
-                                                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
-                                                        )
-                                                        ExposedDropdownMenu(
-                                                            expanded = menuExpanded,
-                                                            onDismissRequest = { menuExpanded = false }
-                                                        ) {
-                                                            for (k in 1 .. 9) {
-                                                                DropdownMenuItem(
-                                                                    text = { Text("${100 * k}", fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
-                                                                    onClick = {
-                                                                        blockSize = k
-                                                                        menuExpanded = false
-                                                                        if (jobIsCompletedOrCancelled(currentTask)) {
-                                                                            currentTask = null
-                                                                            taskStatus.intValue = 0
-                                                                        }
-                                                                    }
-                                                                )
-                                                            }
-                                                        }
-                                                    }
+                                            } else {
+                                                Text(stringResource(id = R.string.file_has_been_selected), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
+                                                TextButton(
+                                                    onClick = {
+                                                        selectInputFile.launch("*/*")
+                                                    },
+                                                    shape = RectangleShape,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 17.dp, end = 17.dp, top = 2.dp, bottom = if (taskIsCompleted) { 15.dp } else { 2.dp })
+                                                ) {
+                                                    Text(stringResource(R.string.file_or_dir_name_and_size, inputFileName, inputFileSizeStr), fontSize = 24.sp, lineHeight = 26.sp)
                                                 }
-                                                else -> Unit
+                                                if (!taskIsCompleted) {
+                                                    Text(
+                                                        stringResource(id = R.string.file_compressor_info1),
+                                                        fontSize = 24.sp,
+                                                        lineHeight = 26.sp,
+                                                        modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 15.dp)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
-                                    else -> Unit
-                                }
-                            }
-                            CardWithTitle(stringResource(id = R.string.note)) {
-                                Text(
-                                    stringResource(id = R.string.file_compressor_warning1),
-                                    fontSize = 24.sp,
-                                    lineHeight = 26.sp,
-                                    modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 5.dp)
-                                )
-                                Text(
-                                    stringResource(id = R.string.file_compressor_clickable_text1),
-                                    fontSize = 24.sp,
-                                    lineHeight = 26.sp,
-                                    modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 10.dp).clickable(enabled = !isRunningTask) {
-                                        startActivity(Intent(this@FileCompressorActivity, DirCompressorActivity::class.java))
+                                    if (taskIsCompleted) {
+                                        OutlinedCard(
+                                            modifier = Modifier.fillMaxWidth().padding(10.dp)
+                                        ) {
+                                            PlaceVerticallyCentrally {
+                                                Text(stringResource(id = R.string.task_is_completed), textAlign = TextAlign.Center, fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
+                                                OutlinedButton(
+                                                    onClick = { (this@FileCompressorActivity).finish() },
+                                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 15.dp)
+                                                ) {
+                                                    Text(stringResource(id = R.string.exit), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(2.dp))
+                                                }
+                                            }
+                                        }
                                     }
-                                )
-                            }
-                            if (!(isRunningTask || taskIsCompleted)) {
-                                OutlinedCard(
-                                    modifier = Modifier.fillMaxWidth().padding(10.dp)
-                                ) {
-                                    PlaceVerticallyCentrally {
-                                        val outputFileName by remember {
-                                            derivedStateOf {
-                                                inputFileName.let { inputFileNameLocal ->
-                                                    val newExt = selectedFormat.fileExtension
-                                                    if (inputFileNameLocal.isEmpty()) {
-                                                        "output.$newExt"
-                                                    } else {
-                                                        when (selectedFormat) {
-                                                            CompressionOrArchiveFormat.ZIP, CompressionOrArchiveFormat.SEVEN_Z -> run {
-                                                                val i = inputFileNameLocal.lastIndexOf('.')
-                                                                if (i == -1) {
-                                                                    "$inputFileNameLocal.$newExt"
-                                                                } else {
-                                                                    inputFileNameLocal.slice(0 .. i) + newExt
+                                },
+                                {
+                                    CardWithTitle(stringResource(id = R.string.options), modifier = Modifier.fillMaxSize().padding(10.dp)) {
+                                        val formatDisplayName by remember { derivedStateOf { toDisplayName(selectedFormat) } }
+                                        var menuExpanded by remember { mutableStateOf(false) }
+                                        ExposedDropdownMenuBox(
+                                            expanded = menuExpanded,
+                                            onExpandedChange = { menuExpanded = it },
+                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 10.dp)
+                                        ) {
+                                            OutlinedTextField(
+                                                formatDisplayName,
+                                                readOnly = true,
+                                                onValueChange = { /* Empty */ },
+                                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
+                                                label = { Text(stringResource(id = R.string.compression_format)) },
+                                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = menuExpanded,
+                                                onDismissRequest = { menuExpanded = false }
+                                            ) {
+                                                (remember {
+                                                    arrayOf(
+                                                        CompressionOrArchiveFormat.BZIP2,
+                                                        CompressionOrArchiveFormat.GZIP,
+                                                        CompressionOrArchiveFormat.LZMA,
+                                                        CompressionOrArchiveFormat.LZ4,
+                                                        CompressionOrArchiveFormat.XZ,
+                                                        CompressionOrArchiveFormat.ZSTD,
+                                                        // Above: compression formats; below: archive formats
+                                                        CompressionOrArchiveFormat.SEVEN_Z,
+                                                        CompressionOrArchiveFormat.ZIP
+                                                    )
+                                                }).forEach { format ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(toDisplayName(format), fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
+                                                        onClick = {
+                                                            selectedFormat = format
+                                                            menuExpanded = false
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        if (selectedFormat == CompressionOrArchiveFormat.SEVEN_Z) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.Start,
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
+                                            ) {
+                                                Checkbox(
+                                                    checked = shouldUsePassword,
+                                                    onCheckedChange = { checked ->
+                                                        password1.clearText()
+                                                        password2.clearText()
+                                                        shouldUsePassword = checked
+                                                        if (jobIsCompletedOrCancelled(currentTask)) {
+                                                            currentTask = null
+                                                            taskStatus.intValue = 0
+                                                        }
+                                                    },
+                                                    enabled = !isRunningTask,
+                                                    modifier = Modifier.padding(2.dp)
+                                                )
+                                                Text(
+                                                    stringResource(id = R.string.compressor_option_set_password),
+                                                    fontSize = 24.sp,
+                                                    lineHeight = 26.sp,
+                                                    modifier = Modifier.clickable(enabled = !isRunningTask) {
+                                                        password1.clearText()
+                                                        password2.clearText()
+                                                        shouldUsePassword = !shouldUsePassword
+                                                        if (jobIsCompletedOrCancelled(currentTask)) {
+                                                            currentTask = null
+                                                            taskStatus.intValue = 0
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                            if (shouldUsePassword) {
+                                                PasswordSettingFields(password1, password2)
+                                            }
+                                        }
+                                        when (selectedFormat) {
+                                            CompressionOrArchiveFormat.BZIP2, CompressionOrArchiveFormat.GZIP, CompressionOrArchiveFormat.ZIP -> PlaceVerticallyFromStart {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 15.dp, top = 0.dp, bottom = 10.dp)
+                                                ) {
+                                                    Checkbox(
+                                                        checked = showsAdvancedOptions,
+                                                        onCheckedChange = { checked ->
+                                                            showsAdvancedOptions = checked
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        },
+                                                        enabled = !isRunningTask,
+                                                        modifier = Modifier.padding(2.dp)
+                                                    )
+                                                    Text(
+                                                        stringResource(id = R.string.show_advanced_options),
+                                                        fontSize = 24.sp,
+                                                        lineHeight = 26.sp,
+                                                        modifier = Modifier.clickable(enabled = !isRunningTask) {
+                                                            showsAdvancedOptions = !showsAdvancedOptions
+                                                            if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                currentTask = null
+                                                                taskStatus.intValue = 0
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                if (showsAdvancedOptions) {
+                                                    when (selectedFormat) {
+                                                        CompressionOrArchiveFormat.ZIP, CompressionOrArchiveFormat.GZIP -> PlaceVerticallyFromStart {
+                                                            var menuExpanded by remember { mutableStateOf(false) }
+                                                            ExposedDropdownMenuBox(
+                                                                expanded = menuExpanded,
+                                                                onExpandedChange = { menuExpanded = it },
+                                                                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 10.dp)
+                                                            ) {
+                                                                OutlinedTextField(
+                                                                    "$compressionLevel",
+                                                                    readOnly = true,
+                                                                    onValueChange = { /* Empty */ },
+                                                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
+                                                                    label = { Text(stringResource(id = R.string.compression_level)) },
+                                                                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                                                    modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
+                                                                )
+                                                                ExposedDropdownMenu(
+                                                                    expanded = menuExpanded,
+                                                                    onDismissRequest = { menuExpanded = false }
+                                                                ) {
+                                                                    for (level in 1 .. 9) {
+                                                                        DropdownMenuItem(
+                                                                            text = { Text("$level", fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
+                                                                            onClick = {
+                                                                                compressionLevel = level
+                                                                                menuExpanded = false
+                                                                                if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                                    currentTask = null
+                                                                                    taskStatus.intValue = 0
+                                                                                }
+                                                                            }
+                                                                        )
+                                                                    }
                                                                 }
                                                             }
-                                                            else -> "$inputFileNameLocal.$newExt"
                                                         }
+                                                        CompressionOrArchiveFormat.BZIP2 -> PlaceVerticallyFromStart {
+                                                            var menuExpanded by remember { mutableStateOf(false) }
+                                                            ExposedDropdownMenuBox(
+                                                                expanded = menuExpanded,
+                                                                onExpandedChange = { menuExpanded = it },
+                                                                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 10.dp)
+                                                            ) {
+                                                                OutlinedTextField(
+                                                                    "${100 * blockSize} kB",
+                                                                    readOnly = true,
+                                                                    onValueChange = { /* Empty */ },
+                                                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuExpanded) },
+                                                                    label = { Text(stringResource(id = R.string.block_size)) },
+                                                                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                                                    modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !isRunningTask)
+                                                                )
+                                                                ExposedDropdownMenu(
+                                                                    expanded = menuExpanded,
+                                                                    onDismissRequest = { menuExpanded = false }
+                                                                ) {
+                                                                    for (k in 1 .. 9) {
+                                                                        DropdownMenuItem(
+                                                                            text = { Text("${100 * k}", fontSize = 20.sp, lineHeight = 22.sp, modifier = Modifier.padding(10.dp)) },
+                                                                            onClick = {
+                                                                                blockSize = k
+                                                                                menuExpanded = false
+                                                                                if (jobIsCompletedOrCancelled(currentTask)) {
+                                                                                    currentTask = null
+                                                                                    taskStatus.intValue = 0
+                                                                                }
+                                                                            }
+                                                                        )
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        else -> Unit
                                                     }
                                                 }
                                             }
+                                            else -> Unit
                                         }
-                                        Text(stringResource(id = R.string.compression_will_start), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
-                                        Button(
-                                            onClick = {
-                                                if (shouldUsePassword && (password1.text.toString() != password2.text.toString())) {
-                                                    coroutineScope.launch {
-                                                        snackbarHostState.showSnackbar(getString(R.string.error3))
-                                                    }
-                                                } else {
-                                                    createOutputFile.launch(outputFileName)
-                                                }
-                                            },
-                                            modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 15.dp)
+                                    }
+                                },
+                                { /* Empty */ },
+                                {
+                                    CardWithTitle(stringResource(id = R.string.note)) {
+                                        Text(
+                                            stringResource(id = R.string.file_compressor_warning1),
+                                            fontSize = 24.sp,
+                                            lineHeight = 26.sp,
+                                            modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 5.dp)
+                                        )
+                                        Text(
+                                            stringResource(id = R.string.file_compressor_clickable_text1),
+                                            fontSize = 24.sp,
+                                            lineHeight = 26.sp,
+                                            modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 10.dp).clickable(enabled = !isRunningTask) {
+                                                startActivity(Intent(this@FileCompressorActivity, DirCompressorActivity::class.java))
+                                            }
+                                        )
+                                    }
+                                    if (!(isRunningTask || taskIsCompleted)) {
+                                        OutlinedCard(
+                                            modifier = Modifier.fillMaxWidth().padding(10.dp)
                                         ) {
-                                            Text(stringResource(id = R.string.choose_output_path), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
+                                            PlaceVerticallyCentrally {
+                                                val outputFileName by remember {
+                                                    derivedStateOf {
+                                                        inputFileName.let { inputFileNameLocal ->
+                                                            val newExt = selectedFormat.fileExtension
+                                                            if (inputFileNameLocal.isEmpty()) {
+                                                                "output.$newExt"
+                                                            } else {
+                                                                when (selectedFormat) {
+                                                                    CompressionOrArchiveFormat.ZIP, CompressionOrArchiveFormat.SEVEN_Z -> run {
+                                                                        val i = inputFileNameLocal.lastIndexOf('.')
+                                                                        if (i == -1) {
+                                                                            "$inputFileNameLocal.$newExt"
+                                                                        } else {
+                                                                            inputFileNameLocal.slice(0 .. i) + newExt
+                                                                        }
+                                                                    }
+                                                                    else -> "$inputFileNameLocal.$newExt"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                Text(stringResource(id = R.string.compression_will_start), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp))
+                                                Button(
+                                                    onClick = {
+                                                        if (shouldUsePassword && (password1.text.toString() != password2.text.toString())) {
+                                                            coroutineScope.launch {
+                                                                snackbarHostState.showSnackbar(getString(R.string.error3))
+                                                            }
+                                                        } else {
+                                                            createOutputFile.launch(outputFileName)
+                                                        }
+                                                    },
+                                                    modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 15.dp)
+                                                ) {
+                                                    Text(stringResource(id = R.string.choose_output_path), fontSize = 24.sp, lineHeight = 26.sp, modifier = Modifier.padding(5.dp))
+                                                }
+                                            }
                                         }
                                     }
                                 }
-                            }
+                            )
                         } ?: PlaceVerticallyCentrally {
                             Button(
                                 onClick = {

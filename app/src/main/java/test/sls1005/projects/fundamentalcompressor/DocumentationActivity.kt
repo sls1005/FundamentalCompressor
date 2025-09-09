@@ -44,7 +44,7 @@ class DocumentationActivity : ComponentActivity() {
                     topBar = {
                         TopAppBar(
                             title = {
-                                Text("Documentation", fontWeight = FontWeight.Bold)
+                                Text(stringResource(id = R.string.documentation), fontWeight = FontWeight.Bold)
                             }
                         )
                     },
@@ -68,6 +68,9 @@ class DocumentationActivity : ComponentActivity() {
                         }).forEach {
                             val (titleId, subtree) = it
                             DocTitle(titleId)
+                            if (titleId == R.string.doc_title1) {
+                                DocParagraph(R.string.doc_text1_1)
+                            }
                             subtree.forEach {
                                 val (subtitleId, ids) = it
                                 DocSubtitle(subtitleId)

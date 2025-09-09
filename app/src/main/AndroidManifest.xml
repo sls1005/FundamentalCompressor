@@ -29,12 +29,14 @@
             android:name=".FileCompressorActivity"
             android:exported="false"
             android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Theme.FundamentalCompressor">
         </activity>
         <activity
             android:name=".DirCompressorActivity"
             android:exported="false"
             android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Theme.FundamentalCompressor">
         </activity>
         <activity
@@ -42,6 +44,7 @@
             android:label="@string/decompressor_label"
             android:exported="true"
             android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Theme.FundamentalCompressor">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -56,80 +59,80 @@
                 <data android:scheme="file" android:mimeType="application/java-archive"/>
             </intent-filter>
             <intent-filter>
-                <data android:scheme="content" android:path="*.bz2"/>
-                <data android:scheme="file" android:path="*.bz2"/>
-                <data android:scheme="content" android:path="*.gz"/>
-                <data android:scheme="file" android:path="*.gz"/>
-                <data android:scheme="content" android:path="*.lz4"/>
-                <data android:scheme="file" android:path="*.lz4"/>
-                <data android:scheme="content" android:path="*.lzma"/>
-                <data android:scheme="file" android:path="*.lzma"/>
-                <data android:scheme="content" android:path="*.7z"/>
-                <data android:scheme="file" android:path="*.7z"/>
-                <data android:scheme="content" android:path="*.tar"/>
-                <data android:scheme="file" android:path="*.tar"/>
-                <data android:scheme="content" android:path="*.taz"/>
-                <data android:scheme="file" android:path="*.taz"/>
-                <data android:scheme="content" android:path="*.tgz"/>
-                <data android:scheme="file" android:path="*.tgz"/>
-                <data android:scheme="content" android:path="*.tlz"/>
-                <data android:scheme="file" android:path="*.tlz"/>
-                <data android:scheme="content" android:path="*.txz"/>
-                <data android:scheme="file" android:path="*.txz"/>
-                <data android:scheme="content" android:path="*.tzst"/>
-                <data android:scheme="file" android:path="*.tzst"/>
-                <data android:scheme="content" android:path="*.xz"/>
-                <data android:scheme="file" android:path="*.xz"/>
-                <data android:scheme="content" android:path="*.Z"/>
-                <data android:scheme="file" android:path="*.Z"/>
-                <data android:scheme="content" android:path="*.zip"/>
-                <data android:scheme="file" android:path="*.zip"/>
-                <data android:scheme="content" android:path="*.ZIP"/>
-                <data android:scheme="file" android:path="*.ZIP"/>
-                <data android:scheme="content" android:path="*.zst"/>
-                <data android:scheme="file" android:path="*.zst"/>
-                <data android:scheme="content" android:path="*.apk"/>
-                <data android:scheme="file" android:path="*.apk"/>
-                <data android:scheme="content" android:path="*.jar"/>
-                <data android:scheme="file" android:path="*.jar"/>
+                <data android:scheme="content" android:path="/*.bz2"/>
+                <data android:scheme="file" android:path="/*.bz2"/>
+                <data android:scheme="content" android:path="/*.gz"/>
+                <data android:scheme="file" android:path="/*.gz"/>
+                <data android:scheme="content" android:path="/*.lz4"/>
+                <data android:scheme="file" android:path="/*.lz4"/>
+                <data android:scheme="content" android:path="/*.lzma"/>
+                <data android:scheme="file" android:path="/*.lzma"/>
+                <data android:scheme="content" android:path="/*.7z"/>
+                <data android:scheme="file" android:path="/*.7z"/>
+                <data android:scheme="content" android:path="/*.tar"/>
+                <data android:scheme="file" android:path="/*.tar"/>
+                <data android:scheme="content" android:path="/*.taz"/>
+                <data android:scheme="file" android:path="/*.taz"/>
+                <data android:scheme="content" android:path="/*.tgz"/>
+                <data android:scheme="file" android:path="/*.tgz"/>
+                <data android:scheme="content" android:path="/*.tlz"/>
+                <data android:scheme="file" android:path="/*.tlz"/>
+                <data android:scheme="content" android:path="/*.txz"/>
+                <data android:scheme="file" android:path="/*.txz"/>
+                <data android:scheme="content" android:path="/*.tzst"/>
+                <data android:scheme="file" android:path="/*.tzst"/>
+                <data android:scheme="content" android:path="/*.xz"/>
+                <data android:scheme="file" android:path="/*.xz"/>
+                <data android:scheme="content" android:path="/*.Z"/>
+                <data android:scheme="file" android:path="/*.Z"/>
+                <data android:scheme="content" android:path="/*.zip"/>
+                <data android:scheme="file" android:path="/*.zip"/>
+                <data android:scheme="content" android:path="/*.ZIP"/>
+                <data android:scheme="file" android:path="/*.ZIP"/>
+                <data android:scheme="content" android:path="/*.zst"/>
+                <data android:scheme="file" android:path="/*.zst"/>
+                <data android:scheme="content" android:path="/*.apk"/>
+                <data android:scheme="file" android:path="/*.apk"/>
+                <data android:scheme="content" android:path="/*.jar"/>
+                <data android:scheme="file" android:path="/*.jar"/>
             </intent-filter>
             <intent-filter>
-                <data android:scheme="content" android:path="*.bz2" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.bz2" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.gz" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.gz" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.lz4" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.lz4" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.lzma" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.lzma" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.7z" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.7z" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.tar" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.tar" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.taz" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.taz" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.tgz" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.tgz" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.tlz" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.tlz" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.txz" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.txz" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.tzst" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.tzst" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.xz" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.xz" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.Z" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.Z" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.zip" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.zip" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.ZIP" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.ZIP" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.zst" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.zst" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.apk" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.apk" android:mimeType="*/*"/>
-                <data android:scheme="content" android:path="*.jar" android:mimeType="*/*"/>
-                <data android:scheme="file" android:path="*.jar" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.bz2" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.bz2" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.gz" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.gz" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.lz4" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.lz4" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.lzma" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.lzma" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.7z" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.7z" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.tar" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.tar" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.taz" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.taz" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.tgz" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.tgz" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.tlz" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.tlz" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.txz" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.txz" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.tzst" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.tzst" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.xz" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.xz" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.Z" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.Z" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.zip" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.zip" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.ZIP" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.ZIP" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.zst" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.zst" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.apk" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.apk" android:mimeType="*/*"/>
+                <data android:scheme="content" android:path="/*.jar" android:mimeType="*/*"/>
+                <data android:scheme="file" android:path="/*.jar" android:mimeType="*/*"/>
             </intent-filter>
             <intent-filter>
                 <data android:scheme="content" android:pathSuffix=".bz2"/>

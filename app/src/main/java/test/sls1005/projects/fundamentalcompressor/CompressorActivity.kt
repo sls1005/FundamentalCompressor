@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import test.sls1005.projects.fundamentalcompressor.ui.theme.FundamentalCompressorTheme
@@ -39,7 +40,7 @@ class CompressorActivity : ComponentActivity() {
                                 .sizeIn(minWidth = 400.dp, minHeight = 100.dp)
                                 .padding(10.dp)
                         ) {
-                            Text("Compress a file", fontSize = 24.sp)
+                            Text(stringResource(id = R.string.compress_a_file), fontSize = 24.sp)
                         }
                         OutlinedButton(
                             onClick = { startActivity(Intent(this@CompressorActivity, DirCompressorActivity::class.java)) },
@@ -47,7 +48,7 @@ class CompressorActivity : ComponentActivity() {
                                 .sizeIn(minWidth = 400.dp, minHeight = 100.dp)
                                 .padding(10.dp)
                         ) {
-                            Text("Compress a folder", fontSize = 24.sp)
+                            Text(stringResource(id = R.string.compress_a_folder), fontSize = 24.sp)
                         }
                     }
                 }
